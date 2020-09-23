@@ -481,9 +481,18 @@ Copyright (c) .NET Foundation. All rights reserved.
     <PropertyGroup Condition="'$(PublishSingleFile)' == 'true' and
                               '$(SelfContained)' == 'true' and
                               '$(_TargetFrameworkVersionWithoutV)' >= '5.0' and
-                              '$(SingleFileHostSourcePath)' != ''">
+                              '$(SingleFileHostSourcePath)' != '' and
+                              '$(IncludeAllContentForSelfExtract)' == 'false'">
       <AppHostSourcePath>$(SingleFileHostSourcePath)</AppHostSourcePath>
       <AppHostIntermediatePath>$([System.IO.Path]::GetFullPath('$(IntermediateOutputPath)singlefilehost$(_NativeExecutableExtension)'))</AppHostIntermediatePath>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(PublishSingleFile)' == 'true' and
+                              '$(SelfContained)' == 'true' and
+                              '$(_TargetFrameworkVersionWithoutV)' >= '5.0' and
+                              '$(NetCore3AppHostSourcePath)' != '' and
+                              '$(IncludeAllContentForSelfExtract)' == 'true'">
+      <AppHostSourcePath>$(NetCore3AppHostSourcePath)</AppHostSourcePath>
+      <AppHostIntermediatePath>$([System.IO.Path]::GetFullPath('$(IntermediateOutputPath)apphost$(_NativeExecutableExtension)'))</AppHostIntermediatePath>
     </PropertyGroup>
   </Target>
 

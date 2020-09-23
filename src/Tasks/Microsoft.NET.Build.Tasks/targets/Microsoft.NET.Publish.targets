@@ -585,6 +585,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       <!-- Filter files for PublishSingleFiles scenario -->
       <_FilesToDrop Include="@(ResolvedFileToPublish)"
                     Condition="'$(PublishSingleFile)' == 'true' and
+                               '$(IncludeAllContentForSelfExtract)' == 'false' and
                                '%(ResolvedFileToPublish.DropFromSingleFile)' == 'true'"/>
       <ResolvedFileToPublish Remove="@(_FilesToDrop)"/>
     </ItemGroup>

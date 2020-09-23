@@ -114,6 +114,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
       <Output TaskParameter="PackagesToDownload" ItemName="_PackageToDownload" />
       <Output TaskParameter="AppHost" ItemName="AppHostPack" />
+      <Output TaskParameter="NetCore3AppHost" ItemName="NetCore3AppHostPack" />
       <Output TaskParameter="SingleFileHost" ItemName="SingleFileHostPack" />
       <Output TaskParameter="ComHost" ItemName="ComHostPack" />
       <Output TaskParameter="IjwHost" ItemName="IjwHostPack" />
@@ -199,6 +200,14 @@ Copyright (c) .NET Foundation. All rights reserved.
     </GetPackageDirectory>
 
     <GetPackageDirectory
+      Items="@(NetCore3AppHostPack)"
+      PackageFolders="@(AssetsFilePackageFolder)">
+
+      <Output TaskParameter="Output" ItemName="ResolvedNetCore3AppHostPack" />
+
+    </GetPackageDirectory>
+
+    <GetPackageDirectory
       Items="@(SingleFileHostPack)"
       PackageFolders="@(AssetsFilePackageFolder)">
 
@@ -251,6 +260,16 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <PropertyGroup Condition="'@(ResolvedAppHostPack)' != '' And '$(AppHostSourcePath)' == ''">
       <AppHostSourcePath>@(ResolvedAppHostPack->'%(Path)')</AppHostSourcePath>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ResolvedNetCore3AppHostPack Condition="'%(ResolvedNetCore3AppHostPack.Path)' == '' and '%(ResolvedNetCore3AppHostPack.PackageDirectory)' != ''">
+        <Path>%(ResolvedNetCore3AppHostPack.PackageDirectory)\%(ResolvedNetCore3AppHostPack.PathInPackage)</Path>
+      </ResolvedNetCore3AppHostPack>
+    </ItemGroup>
+
+    <PropertyGroup Condition="'@(ResolvedNetCore3AppHostPack)' != '' And '$(NetCore3AppHostSourcePath)' == ''">
+      <NetCore3AppHostSourcePath>@(ResolvedNetCore3AppHostPack->'%(Path)')</NetCore3AppHostSourcePath>
     </PropertyGroup>
 
     <ItemGroup>

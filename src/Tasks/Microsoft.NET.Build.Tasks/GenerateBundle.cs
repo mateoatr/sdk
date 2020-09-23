@@ -50,13 +50,14 @@ namespace Microsoft.NET.Build.Tasks
             options |= IncludeAllContent ? BundleOptions.BundleAllContent : BundleOptions.None;
             options |= IncludeSymbols ? BundleOptions.BundleSymbolFiles : BundleOptions.None;
 
+            string versionString = options.HasFlag(BundleOptions.BundleAllContent) ? "3.1" : TargetFrameworkVersion; 
             var bundler = new Bundler(
                 AppHostName,
                 OutputDir,
                 options,
                 targetOS,
                 targetArch,
-                new Version(TargetFrameworkVersion),
+                new Version(versionString),
                 ShowDiagnosticOutput);
 
             var fileSpec = new List<FileSpec>(FilesToBundle.Length);

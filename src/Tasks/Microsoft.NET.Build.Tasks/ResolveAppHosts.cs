@@ -65,6 +65,9 @@ namespace Microsoft.NET.Build.Tasks
         public ITaskItem[] AppHost { get; set; }
 
         [Output]
+        public ITaskItem[] NetCore3AppHost { get; set; }
+
+        [Output]
         public ITaskItem[] SingleFileHost { get; set; }
 
         [Output]
@@ -115,6 +118,31 @@ namespace Microsoft.NET.Build.Tasks
                 if (appHostItem != null)
                 {
                     AppHost = new ITaskItem[] { appHostItem };
+                }
+
+                // This is wrong as it is; we must make sure that we get the _latest_ 3.x.y version,
+                // and allow for 3.0.x apphost packs to be picked if there's no 3.1.x.
+                var knownAppHostPacksForNetCore3X = KnownAppHostPacks
+                .Where(appHostPack =>
+                {
+                    var packTargetFramework = NuGetFramework.Parse(appHostPack.GetMetadata("TargetFramework"));
+                    return packTargetFramework.Framework.Equals(TargetFrameworkIdentifier, StringComparison.OrdinalIgnoreCase) &&
+                        ProcessFrameworkReferences.NormalizeVersion(packTargetFramework.Version) == new Version(3, 1);
+                })
+                .ToList();
+
+                var netCore3AppHostItem = GetHostItem(
+                    AppHostRuntimeIdentifier,
+                    knownAppHostPacksForNetCore3X,
+                    packagesToDownload,
+                    DotNetAppHostExecutableNameWithoutExtension,
+                    "AppHost",
+                    isExecutable: true,
+                    errorIfNotFound: true);
+
+                if (netCore3AppHostItem != null)
+                {
+                    NetCore3AppHost = new ITaskItem[] { netCore3AppHostItem };
                 }
 
                 var singlefileHostItem = GetHostItem(
