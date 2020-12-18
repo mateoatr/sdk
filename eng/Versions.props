@@ -72,6 +72,7 @@
   <PropertyGroup>
     <!-- Dependencies from https://github.com/mono/linker -->
     <MicrosoftNETILLinkTasksPackageVersion>6.0.0-alpha.1.20607.2</MicrosoftNETILLinkTasksPackageVersion>
+    <MicrosoftNETILLinkAnalyzersPackageVersion>6.0.0-dev</MicrosoftNETILLinkAnalyzersPackageVersion>
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/dotnet/runtime -->

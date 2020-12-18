@@ -70,6 +70,13 @@ Copyright (c) .NET Foundation. All rights reserved.
       IsImplicitlyDefined="true" />
   </ItemGroup>
 
+  <!-- IL Linker Analyzers -->
+  <ItemGroup>
+    <Analyzer
+      Include="$(MSBuildThisFileDirectory)..\..\Microsoft.NET.ILLink.Tasks\analyzers\dotnet\cs\ILLink.RoslynAnalyzer.dll"
+      IsImplicitlyDefined="true" />
+  </ItemGroup>
+
   <!-- C# Code Style Analyzers -->
   <ItemGroup Condition="$(EnforceCodeStyleInBuild) And '$(Language)' == 'C#'">
     <Analyzer
