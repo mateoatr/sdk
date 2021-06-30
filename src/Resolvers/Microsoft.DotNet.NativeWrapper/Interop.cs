@@ -2,7 +2,11 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
+using System.Linq;
+using System.Reflection;
 using System.Runtime.InteropServices;
 
 #nullable disable
@@ -11,13 +15,61 @@ namespace Microsoft.DotNet.NativeWrapper
 {
     public static partial class Interop
     {
+        private static readonly string LibHostFxrDylibPath;
         public static readonly bool RunningOnWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
+        public static readonly bool RunningOnMacOS = RuntimeInformation.IsOSPlatform(OSPlatform.OSX);
 
         static Interop()
         {
             if (RunningOnWindows)
             {
                 PreloadWindowsLibrary("hostfxr.dll");
+            }
+            else if (RunningOnMacOS)
+            {
+                var dotnetLocation = Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName);
+                var hostFxrDir = Path.Combine(dotnetLocation, "host", "fxr");
+                var foundHostFxrs = new List<(Version Version, string Path)>();
+                foreach (var dir in Directory.GetDirectories(hostFxrDir)
+                    .Select(f => Path.GetFileName(f)!)
+                    .ToList())
+                {
+                    var previewDelimiter = dir.IndexOf('-');
+                    if (previewDelimiter != -1)
+                    {
+                        string simplifiedVersion = dir.Substring(0, previewDelimiter) +
+                            new string(dir.Substring(previewDelimiter).Where(char.IsDigit).ToArray());
+                        foundHostFxrs.Add((Version.Parse(simplifiedVersion), Path.Combine(hostFxrDir, dir)));
+                    }
+                    else
+                    {
+                        foundHostFxrs.Add((Version.Parse(dir), Path.Combine(hostFxrDir, dir)));
+                    }
+                }
+
+                foundHostFxrs.Sort();
+                foundHostFxrs.Reverse();
+                foreach (var fxr in foundHostFxrs)
+                {
+                    var libhostfxr = Path.Combine(fxr.Path, "libhostfxr.dylib");
+                    if (File.Exists(libhostfxr))
+                    {
+                        LibHostFxrDylibPath = libhostfxr;
+                        NativeLibrary.SetDllImportResolver(typeof(Interop).Assembly, MacOSDllImportResolver);
+                        return;
+                    }
+                }
+
+                static IntPtr MacOSDllImportResolver(string libraryName, Assembly assembly, DllImportSearchPath? searchPath)
+                {
+                    if (libraryName == "hostfxr")
+                    {
+                        NativeLibrary.TryLoad(LibHostFxrDylibPath, out IntPtr handle);
+                        return handle;
+                    }
+
+                    return IntPtr.Zero;
+                }
             }
         }
 
@@ -121,6 +173,12 @@ namespace Microsoft.DotNet.NativeWrapper
             internal static extern int hostfxr_get_available_sdks(
                 string exe_dir,
                 hostfxr_get_available_sdks_result_fn result);
+        }
+
+        public static class OSX
+        {
+            [DllImport("libdl.dylib")]
+            private static extern IntPtr dlopen(string fileName, int flags);
         }
 
         public static class Unix
