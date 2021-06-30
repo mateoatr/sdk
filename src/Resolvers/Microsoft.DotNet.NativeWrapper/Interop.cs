@@ -175,12 +175,6 @@ namespace Microsoft.DotNet.NativeWrapper
                 hostfxr_get_available_sdks_result_fn result);
         }
 
-        public static class OSX
-        {
-            [DllImport("libdl.dylib")]
-            private static extern IntPtr dlopen(string fileName, int flags);
-        }
-
         public static class Unix
         {
             // Ansi marshaling on Unix is actually UTF8
